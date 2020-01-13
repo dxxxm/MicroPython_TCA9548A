@@ -23,23 +23,14 @@ class TCA9548AChannel:
 
     def __getattr__(self, name):
         def wrapper(*args, **kwargs):
-            getattr(self.tca.i2c, name)(*args, **kwargs)
+            self._switch()
+            if args[0] == self.tca.address:
+                raise ValueError(
+                    "Device address must be different than TCA9548A address."
+                )
+            return getattr(self.tca.i2c, name)(*args, **kwargs)
 
         return wrapper
-
-    def readfrom_into(self, address, buffer, **kwargs):
-        """Pass thru for readfrom_into."""
-        if address == self.tca.address:
-            raise ValueError("Device address must be different than TCA9548A address.")
-        self._switch()
-        return self.tca.i2c.readfrom_into(address, buffer, **kwargs)
-
-    def writeto(self, address, buffer, **kwargs):
-        """Pass thru for writeto."""
-        if address == self.tca.address:
-            raise ValueError("Device address must be different than TCA9548A address.")
-        self._switch()
-        return self.tca.i2c.writeto(address, buffer, **kwargs)
 
 
 class TCA9548A:
